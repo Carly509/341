@@ -5,7 +5,7 @@ const doc = {
         title: 'Contacts API',
         description: 'API for managing contacts',
     },
-    host: 'localhost:3000',
+    host: 'https://three41-tqb8.onrender.com/',
     schemes: ['https'],
     consumes: ['application/json'],
     produces: ['application/json'],
