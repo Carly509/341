@@ -6,7 +6,7 @@ const doc = {
         description: 'API for managing contacts',
     },
     host: 'localhost:3000',
-    schemes: ['http','https'],
+    schemes: ['https'],
     consumes: ['application/json'],
     produces: ['application/json'],
     tags: [
