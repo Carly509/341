@@ -6,7 +6,7 @@ const doc = {
     description: 'CRUD API for task management system',
     version: '1.0.0'
   },
-  host: 'localhost:3000',
+  host: 'three41-1.onrender.com',
   schemes: ['https'],
   consumes: ['application/json'],
   produces: ['application/json'],
