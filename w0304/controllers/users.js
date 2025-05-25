@@ -22,13 +22,11 @@ const createUser = async (req, res) => {
     if (validationError) {
       return res.status(400).json({ message: validationError });
     }
-
     const user = {
       username: req.body.username,
       email: req.body.email,
       name: req.body.name
     };
-
     const result = await mongodb.getDb().collection('users').insertOne(user);
 
     if (result.acknowledged) {
