@@ -1,5 +1,6 @@
 const mongodb = require('../data/database');
 const { ObjectId } = require('mongodb');
+const { get } = require('../routes');
 
 const validateUser = (user) => {
   const { username, email, name } = user;
@@ -39,6 +40,17 @@ const createUser = async (req, res) => {
   }
 };
 
+
+const getAll = async (req, res) => {
+    try {
+        const result = await mongodb.getDb().collection('users').find().toArray();
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).json(result);
+    } catch (err) {
+        res.status(500).json({ message: 'Error retrieving users', error: err });
+    }
+};
+
 const getUser = async (req, res) => {
     //#swagger.tags = ['Users']
     try {
@@ -58,5 +70,6 @@ const getUser = async (req, res) => {
 
 module.exports = {
     createUser,
+    getAll,
     getUser
 };

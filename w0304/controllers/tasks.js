@@ -12,7 +12,6 @@ const validateTask = (task) => {
   return null;
 };
 
-
 const taskController = {
 createTask: async (req, res) => {
     //#swagger.tags = ['Tasks']
