@@ -62,17 +62,17 @@ getTaskById: async (req, res) => {
         });
       }
 
-              const result = await mongodb.getDb().collection('tasks').find({ _id: new ObjectId(id) }).toArray();
+  const result = await mongodb.getDb().collection('tasks').find({ _id: new ObjectId(id) }).toArray();
 
-              if (result.length === 0) {
-                  return res.status(404).json({ message: 'task not found' });
-              }
+     if (result.length === 0) {
+        return res.status(404).json({ message: 'task not found' });
+      }
 
-              res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Type', 'application/json');
               res.status(200).json(result[0]);
-          } catch (err) {
+       } catch (err) {
               res.status(500).json({ message: 'Error retrieving task', error: err });
-          }
+   }
 },
 updateTask: async (req, res) => {
     //#swagger.tags = ['Tasks']

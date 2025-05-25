@@ -1,6 +1,5 @@
 const mongodb = require('../data/database');
 const { ObjectId } = require('mongodb');
-const { get } = require('../routes');
 
 const validateUser = (user) => {
   const { username, email, name } = user;
@@ -31,7 +30,7 @@ const createUser = async (req, res) => {
     const result = await mongodb.getDb().collection('users').insertOne(user);
 
     if (result.acknowledged) {
-      res.status(201).json({ message: 'User created successfully', _userId: result.insertedId });
+      res.status(201).json({ message: 'User created successfully', _id: result.insertedId });
     } else {
       res.status(500).json({ message: 'Error creating user' });
     }
@@ -42,6 +41,7 @@ const createUser = async (req, res) => {
 
 
 const getAll = async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
         const result = await mongodb.getDb().collection('users').find().toArray();
         res.setHeader('Content-Type', 'application/json');
@@ -55,16 +55,17 @@ const getUser = async (req, res) => {
     //#swagger.tags = ['Users']
     try {
         const userId = new ObjectId(req.params.id);
-        const result = await mongodb.getDb().collection('users').find({ _userId: userId }).toArray();
+        const result = await mongodb.getDb().collection('users').findOne({ _id: userId });
 
-        if (result.length === 0) {
+        if (!result) {
             return res.status(404).json({ message: 'User not found' });
         }
 
         res.setHeader('Content-Type', 'application/json');
-        res.status(200).json(result[0]);
+        res.status(200).json(result);
     } catch (err) {
-        res.status(500).json({ message: 'Error retrieving user', error: err });
+        console.error(err); // Log the error for debugging
+        res.status(500).json({ message: 'Error retrieving user', error: err.message });
     }
 };
 
