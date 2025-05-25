@@ -14,28 +14,49 @@ const doc = {
     Task: {
       title: 'Task Title',
       description: 'Task Description',
-      status: 'open',
-      dueDate: '2023-10-01',
-      createdAt: '2023-09-01',
-      updatedAt: '2023-09-01',
+      status: 'Pending',
+      dueDate: '2023-10-01T00:00:00Z',
+      createdAt: '2023-09-01T00:00:00Z',
+      updatedAt: '2023-09-01T00:00:00Z',
       category: 'Work',
       priority: 'High'
     },
-    TaskResponse: {
-      success: true,
-      message: 'Task created successfully',
-      data: {
-        $ref: '#/definitions/Task'
-      }
-    },
-    Error: {
-      success: false,
-      message: 'Error message',
-      error: 'Detailed error information'
+    User: {
+      username: 'John_Doe',
+      email: 'jhon@email.com',
+      name: 'John Doe'
     }
-  }
+  },
+  tags: [
+    {
+      name: 'Tasks',
+      description: 'Task management operations'
+    },
+    {
+      name: 'Users',
+      description: 'User management operations'
+    }
+  ],
+  TaskResponse: {
+    success: true,
+    message: 'Task created successfully',
+    data: {
+         $ref: '#/definitions/Task'
+    },
+    },
+    UserResponse: {
+        success: true,
+        message: 'User created successfully',
+        data: {
+            $ref: '#/definitions/User'
+        },
+    },
+    error: {
+        success: false,
+        message: 'Error creating task',
+        error: 'Error details here'
+    }
 };
-
 const outputFile = './swagger-output.json';
 const endpointsFiles = ['./server.js'];
 
