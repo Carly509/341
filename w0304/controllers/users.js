@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { ObjectId } = require('mongodb');
 
-// Validate user input
 const validateUser = (user) => {
   const { username, email, name, password } = user;
   if (!username || typeof username !== 'string') {
@@ -21,7 +20,6 @@ const validateUser = (user) => {
   return null;
 };
 
-// Create a new user
 const createUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -30,12 +28,12 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: validationError });
     }
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10); // Hash the password
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user = {
       username: req.body.username,
       email: req.body.email,
       name: req.body.name,
-      password: hashedPassword // Store hashed password
+      password: hashedPassword
     };
 
     const result = await mongodb.getDb().collection('users').insertOne(user);
@@ -74,7 +72,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Middleware to authenticate tokens
 const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.sendStatus(401);
@@ -86,7 +83,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Get all users
 const getAllUsers = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -98,7 +94,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// Get a specific user by ID
 const getUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -117,7 +112,6 @@ const getUser = async (req, res) => {
   }
 };
 
-// Update user details
 const updateUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -150,7 +144,7 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Delete a user
+
 const deleteUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -169,6 +163,7 @@ const deleteUser = async (req, res) => {
 };
 
 const logoutUser = (req, res) => {
+  //#swagger.tags = ['Users']
   res.clearCookie('token');
   res.status(200).json({ message: 'Logout successful.' });
 };
