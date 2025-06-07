@@ -1,8 +1,11 @@
 const mongodb = require('../data/database');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { ObjectId } = require('mongodb');
 
+// Validate user input
 const validateUser = (user) => {
-  const { username, email, name } = user;
+  const { username, email, name, password } = user;
   if (!username || typeof username !== 'string') {
     return 'Invalid username';
   }
@@ -12,9 +15,13 @@ const validateUser = (user) => {
   if (!name || typeof name !== 'string') {
     return 'Invalid name';
   }
+  if (!password || typeof password !== 'string') {
+    return 'Invalid password';
+  }
   return null;
 };
 
+// Create a new user
 const createUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -22,11 +29,15 @@ const createUser = async (req, res) => {
     if (validationError) {
       return res.status(400).json({ message: validationError });
     }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10); // Hash the password
     const user = {
       username: req.body.username,
       email: req.body.email,
-      name: req.body.name
+      name: req.body.name,
+      password: hashedPassword // Store hashed password
     };
+
     const result = await mongodb.getDb().collection('users').insertOne(user);
 
     if (result.acknowledged) {
@@ -35,21 +46,59 @@ const createUser = async (req, res) => {
       res.status(500).json({ message: 'Error creating user' });
     }
   } catch (err) {
-    res.status(500).json({ message: 'Error creating user', error: err });
+    res.status(500).json({ message: 'Error creating user', error: err.message });
   }
 };
 
-const getAll = async (req, res) => {
+// Login a user
+const loginUser = async (req, res) => {
+  //#swagger.tags = ['Users']
+  try {
+    const { email, password } = req.body;
+    const user = await mongodb.getDb().collection('users').findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict' });
+    res.status(200).json({ message: 'Login successful', token });
+  } catch (err) {
+    res.status(500).json({ message: 'Error logging in', error: err.message });
+  }
+};
+
+// Middleware to authenticate tokens
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+// Get all users
+const getAllUsers = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
     const result = await mongodb.getDb().collection('users').find().toArray();
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(result);
   } catch (err) {
-    res.status(500).json({ message: 'Error retrieving users', error: err });
+    res.status(500).json({ message: 'Error retrieving users', error: err.message });
   }
 };
 
+// Get a specific user by ID
 const getUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -68,6 +117,7 @@ const getUser = async (req, res) => {
   }
 };
 
+// Update user details
 const updateUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -80,7 +130,8 @@ const updateUser = async (req, res) => {
     const updatedUser = {
       username: req.body.username,
       email: req.body.email,
-      name: req.body.name
+      name: req.body.name,
+      password: req.body.password ? await bcrypt.hash(req.body.password, 10) : undefined
     };
 
     const result = await mongodb.getDb().collection('users').updateOne(
@@ -99,6 +150,7 @@ const updateUser = async (req, res) => {
   }
 };
 
+// Delete a user
 const deleteUser = async (req, res) => {
   //#swagger.tags = ['Users']
   try {
@@ -116,9 +168,17 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const logoutUser = (req, res) => {
+  res.clearCookie('token');
+  res.status(200).json({ message: 'Logout successful.' });
+};
+
 module.exports = {
   createUser,
-  getAll,
+  loginUser,
+  logoutUser,
+  authenticateToken,
+  getAllUsers,
   getUser,
   updateUser,
   deleteUser
